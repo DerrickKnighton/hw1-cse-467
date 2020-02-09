@@ -1,0 +1,96 @@
+# Define the input
+text = "hello."  #@param {type:"string"}
+text_original = text
+
+if re.search('\?',text):
+   
+   #changed default answer to redirect conversation to other side
+   # this is re 1
+   text = re.sub('how are you(.*)', 'I am good how about you', text)
+  
+   #eliza askes you if you want to really actually want to do that thing
+   #re 2
+   text = re.sub('.* should i (begin|start|stop) (.*)', 'Depends, do you really want to \g<1> \g<2>',text)
+
+   #added this one in case i didnt program that question
+   # re 3
+   if text == text_original:
+      text = re.sub('(.*)', 'Sorry i am not programmed to understand the question \g<1>', text)
+   
+   print(f'[Eliza]: {text}')  
+
+   
+else:    
+     ################# String replacements ######################
+    text = re.sub('(hi|hello)', 'Hello i am a chatbot', text)
+    #added this for preprocessing removes any word that says when something happened
+    #in beginning of sentence
+    #re 4
+    text = re.sub('(today|yesterday|last week) (.*)', '\g<2>', text)
+
+    #more preprossesing removes name eliza
+    text = text.replace("eliza","")
+    
+    #this is for when they use the word your in a phrase addressed to eliza
+    #re 5
+    #this is similar to re 6 except a little different
+    if re.search('your',text):
+          #remove word your
+          text = re.sub('(.*) (your) (.*)', '\g<1> \g<3>', text)
+          text = re.sub('(.*) (being|doing) (.*)', 'When did you start \g<2> my \g<3>?', text)
+
+
+    #added responses about traveling places
+    #re number 6
+    # this can handle any sentences about going or coming from places and any 
+    #stuff after the statement only workes with past tense
+    text = re.sub('i (went to|traveled to|came from) ([^\s]+) (.*)\.', 'How was \g<2>?', text)
+
+
+    #added responses about the typer feeling something about something
+    #re 7
+    #does not work with used to or any past tense stuff
+    text = re.sub('.* (like|enjoy|love|hate|loath) (.*)\.', 'Really why do you \g<1> \g<2>',text)
+
+
+    #for things currently happening
+    #askes when it started happening
+    #re 8
+    #this doesnt work when addressed towards eliza for ex.
+    #i am doing your laundry eliza
+    text = re.sub('.* (being|doing) (.*)', 'When did you start \g<1> \g<2>', text)
+
+    #eliza also thinks what you do
+    #re 9
+    text = re.sub('.* think (.*)\.', 'I also think \g<1>', text)
+
+    # eliza wants to know why you started that action
+    #re 10
+    text = re.sub('.* (started|began) ([^\s]+) (.*)\.', 'Nice what made you want to start \g<2>', text)
+    
+
+    # don't feel X -> Why do you say you are not X (\g = group, and <n> is the group's number)
+    text = re.sub('.* don\'t feel (.*)','Why do you think you are not \g<1>?',text)
+
+    # feel X -> When did you stat feeling X (\g = group, and <n> is the group's number; 
+    # a group being an RE enclosed by parenthesis)
+    #this can have some conflicts with outputs so only if og is not changed do this
+    if text == text_original:
+        text = re.sub('.* (feel|am|seem to be) (.*)\.','When did you start feeling \g<2>?',text)
+    
+    # Periods -> Question marks
+    text = re.sub('You are (.*)\.','I am \g<1>?',text)
+        
+    # I -> You
+    # (\b means "backspace" in native Python, so we have to use the "raw" prefix 'r' 
+    # (alternatively, use \\b to force an RE interpretation of \b)
+    text = re.sub(r'^I am\b','You are',text)
+
+    # Yes -> Are you sure
+    text = re.sub('^Yes.*','Why do you say that?',text)
+    
+    #base case in case nothing happens not counting this one as a re
+    if text == text_original:
+      text = re.sub('(.*)', 'Sorry i am not programmed to understand the statement \g<1>', text)
+    
+    print(f'[Eliza]: {text}')
